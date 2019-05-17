@@ -1,5 +1,12 @@
-﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+﻿
+.cursor:hover
+{
+	cursor: pointer;
+}
+.polkadot-color 
+{
+	color: rgb(230, 0, 122);
+}
 
 a.navbar-brand {
   white-space: normal;

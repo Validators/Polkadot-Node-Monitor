@@ -1,8 +1,139 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+	ViewData["Title"] = "Dashboard";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+	<h1 class="display-4">Polkadot nodes</h1>
+	<div class="form-group">
+		<button type="button" class="btn  btn-outline-primary" data-toggle="modal" data-target="#newNodeModal">
+			Add node
+		</button>
+	</div>
+	<div class="hide alert alert-warning" v-if="errorMessage !== null">Error: {{errorMessage}}</div>
+	<div class="hide alert alert-primary" v-if="nodes.length == 0">No nodes yet!</div>
+
+	<div class="row mb-5">
+		<div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2" v-for="node in nodes" :key="node.id">
+			<div class="card h-100">
+				<div class="card-body">
+					<h5 class="display-4 text-truncate">{{node.name}}</h5>
+					<p class="lead">
+						<a target="_blank" :href="'https://polkascan.io/pre/alexander/module/account/' + node.address">
+							{{node.address}}
+						</a>
+					</p>
+					<p class="lead">
+						{{node.url}}
+					</p>
+					<hr class="my-4">
+					<div class="row">
+						<div class="col">
+							{{node.chain}}
+						</div>
+						<div class="col">
+							{{node.nameAndVersion}}
+						</div>
+						<div class="col">
+							{{node.peers}} peers
+						</div>
+					</div>
+					<p>
+					</p>
+
+					<nav class="navbar navbar-light p-0">
+						<span class="navbar-text">
+							Updated: {{node.lastUpdatedUtc | ago}}
+						</span>
+						<button class="navbar-toggler ml-auto mr-1" type="button" data-toggle="collapse" :data-target="'#navbarToggleExternalContent' + node.id" :aria-controls="'navbarToggleExternalContent' + node.id" aria-expanded="false" aria-label="Toggle navigation">
+							<span class="navbar-toggler-icon"></span>
+						</button>
+					</nav>
+					<div class="collapse" :id="'navbarToggleExternalContent' + node.id">
+						<div class="pt-4">
+							<div class=""><button class="btn btn-outline-danger" v-on:click="removeNode(node.address)">Remove monitor</button></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Node -->
+	<div class="modal fade" id="newNodeModal" tabindex="-1" role="dialog" aria-labelledby="newNodeLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="newNodeLabel">Monitor new node</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form>
+					<div class="modal-body text-left">
+						<div class="form-group">
+							<label for="nodeName">Node name</label>
+							<input class="form-control" id="newNodeName" type="text" v-model="newNode.name" />
+						</div>
+						<div class="form-group">
+							<label for="nodeName">Node url</label>
+							<input class="form-control" type="text" v-model="newNode.url" />
+						</div>
+						<div class="form-group">
+							<label for="nodeName">Node address</label>
+							<input class="form-control" type="text" v-model="newNode.address" />
+							<small class="form-text text-muted">Your validators "SESSION" address.</small>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" v-on:click="createNode" class="btn btn-outline-primary">Save monitor</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Bot -->
+	<div class="modal fade" id="updateBotModal" tabindex="-1" role="dialog" aria-labelledby="updateBotLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="updateBotLabel">Telegram Bot notifications</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+					<div class="modal-body text-left">
+						<div class="alert alert-primary" v-if="bot.accessToken != null">
+							<h4 class="display-4">Bot is registered.</h4>
+							<p class="lead">Your bot: <a target="_blank" :href="'https://t.me/' + bot.username">{{bot.username}}</a></p>
+							<h4 class="" v-if="bot.isEnabled==true">Is sending alerts.</h4>
+							<h5 v-if="bot.isEnabled==false">Is awaiting for the <strong>/start</strong> message from you.</h5>
+						</div>
+
+						<div class="form-group">
+							<p>Send "<strong>/newbot</strong> to the <a href="https://telegram.me/BotFather" target="_blank">Telegram BotFather</a> bot and follow the instructions to create a bot that will receive notifications from Validators Monitor.
+							If you've already made a bot, then enter the API Token directly.</p>
+						</div>
+						<div class="form-group">
+							<label>HTTP API Token</label>
+							<input class="form-control" type="text" v-model="botAccessTokenInput" />
+							<p class="form-text text-muted">e.g. 720850667:ABEQMMyfTfdvBU7dAwce1GXUqPzvHzkETuQ</p>
+						</div>
+						<div class="form-group">
+							<p>
+								Remember to click the link to your bot that BotFather gave you and send the message <strong>/start</strong> to begin receiving notifications.
+							</p>
+							<p>
+								Thats it :) Now click "<strong>Connect Telegram</strong>" here.
+							</p>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" v-on:click="removeBot" class="btn btn-link text-muted">Remove bot</button>
+						<button type="button" v-on:click="upsertBot" class="btn btn-outline-success">Connect Telegram</button>
+					</div>
+			</div>
+		</div>
+	</div>
+
 </div>
