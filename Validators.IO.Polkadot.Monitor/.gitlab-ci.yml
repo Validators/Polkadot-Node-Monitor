@@ -1,4 +1,4 @@
-﻿image: microsoft/dotnet:2.2-sdk
+image: microsoft/dotnet:2.2-sdk
 variables:
   PROJECT_NAME: 'Validators.IO.Polkadot.Monitor'
   WEB_FOLDER: 'C:\\Internet\\Validators.io\\AdminTestnet\\Web'
@@ -6,6 +6,7 @@ stages:
     - build
     - deploy
     - cleanup
+
 build:
     stage: build
     script:
