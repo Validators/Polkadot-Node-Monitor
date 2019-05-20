@@ -80,7 +80,6 @@ namespace Validators.IO.Polkadot.Monitor
 				app.UseHsts();
 			}
 
-			app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto });
 
 			app.UseHttpsRedirection();
 
