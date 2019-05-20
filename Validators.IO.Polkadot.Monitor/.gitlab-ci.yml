@@ -6,7 +6,6 @@ stages:
     - build
     - deploy
     - cleanup
-
 build:
     stage: build
     script:
@@ -26,7 +25,6 @@ deploy:
         - build
     only:
         - branches
-
 cleanup:
     stage: cleanup
     script: 
@@ -35,5 +33,3 @@ cleanup:
         - deploy
     only:
         - branches
-
-
