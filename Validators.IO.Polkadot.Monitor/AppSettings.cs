@@ -7,6 +7,8 @@ namespace Validators.IO.Polkadot.Monitor
 {
 	public class AppSettings
 	{
+		public string AdminPassword { get; set; }
+
 		public int MonitorTaskFrequencyInSeconds { get; set; }
 		public int BotTaskFrequencyInSeconds { get; set; }
 

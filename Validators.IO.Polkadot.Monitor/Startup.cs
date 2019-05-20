@@ -1,10 +1,20 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using Validators.IO.Polkadot.Monitor.Authentication;
 using Validators.IO.Polkadot.Monitor.Background.Tasks;
 
+/// <summary>
+/// Author: Validators.com
+/// Use with own risk.
+/// Open source. 
+/// </summary>
 namespace Validators.IO.Polkadot.Monitor
 {
 	public class Startup
@@ -28,9 +38,31 @@ namespace Validators.IO.Polkadot.Monitor
 			services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, MonitorTask>();
 			services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, BotTask>();
 
+			// Cookies
+			//
+			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+				.AddCookie(options =>
+				{
+					options.Cookie.Expiration = TimeSpan.FromHours(24);
+				});
+
+			// Simple user store for admin login. Uses "AdminPassword" from appsettings.json
+			//
+			services.AddDefaultIdentity<IdentityUser>()
+				.AddUserStore<InMemoryUserStore>()
+				.AddDefaultTokenProviders();
+
 			// Website
 			//
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			services.AddMvc(config =>
+			{
+				// All MvcControllers are hereby "Authorize". Use AllowAnonymous to give anon access
+				//
+				var policy = new AuthorizationPolicyBuilder()
+				 .RequireAuthenticatedUser()
+				 .Build();
+				config.Filters.Add(new AuthorizeFilter(policy));
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +81,8 @@ namespace Validators.IO.Polkadot.Monitor
 			}
 
 			app.UseHttpsRedirection();
+
+			app.UseAuthentication();
 			app.UseStaticFiles();
 
 			app.UseMvc(routes =>
