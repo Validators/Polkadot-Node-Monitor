@@ -43,7 +43,9 @@ var app = new Vue({
 	},
 	methods: {
 		createNode: function () {
-			// This is required for ".post" to send as JSON!!!!
+			this.errorMessage = null;
+
+			// This is required for ".post" to send as JSON.
 			//
 			$.ajaxSetup({contentType: "application/json; charset=utf-8"});
 			var data = JSON.stringify(this.newNode);
@@ -65,7 +67,6 @@ var app = new Vue({
 			$.get("/api/nodes")
 				.done((result) => {
 					this.nodes = result;
-					this.errorMessage = null;
 				})
 				.fail((err) => {
 					this.errorMessage = JSON.stringify(err);
@@ -79,6 +80,7 @@ var app = new Vue({
 				;
 		},
 		removeNode: function (address) {
+			this.errorMessage = null;
 			var self = this;
 			var data = JSON.stringify({"address":address});
 
@@ -97,6 +99,7 @@ var app = new Vue({
 
 		},
 		upsertBot: function () {
+			this.errorMessage = null;
 
 			$.ajaxSetup({ contentType: "application/json; charset=utf-8" });
 			var data = JSON.stringify({ "accessToken": this.botAccessTokenInput });
@@ -126,6 +129,7 @@ var app = new Vue({
 				});
 		},
 		removeBot: function () {
+			this.errorMessage = null;
 			var self = this;
 			$.ajax({
 				url: '/api/bots',
@@ -186,8 +190,6 @@ var app = new Vue({
 		},
 		ago: function (value) {
 			var d = new Date(Date.parse(value.replace("Z", "")));
-			var dNow = new Date(Date.parse(settings.nowUtc));
-
 			var now = new Date();
 			var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
 

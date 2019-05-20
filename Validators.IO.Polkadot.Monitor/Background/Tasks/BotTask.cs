@@ -14,7 +14,7 @@ namespace Validators.IO.Polkadot.Monitor.Background.Tasks
 		private readonly ILogger logger;
 
 		public BotTask(IServiceScopeFactory serviceScopeFactory, IOptions<AppSettings> settings, ILogger<BotTask> logger)
-			 : base(serviceScopeFactory, "*/" + 3 + " * * * * *")
+			 : base(serviceScopeFactory, "*/" + settings.Value.BotTaskFrequencyInSeconds + " * * * * *")
 		{
 			this.settings = settings.Value;
 			this.logger = logger;

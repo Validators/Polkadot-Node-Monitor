@@ -8,6 +8,8 @@ namespace Validators.IO.Polkadot.Monitor
 	public class AppSettings
 	{
 		public int MonitorTaskFrequencyInSeconds { get; set; }
+		public int BotTaskFrequencyInSeconds { get; set; }
+
 		public string LocalNodeEndpoint { get; set; }
 		public string PublicNodeEndpoint { get; set; }
 		public string PolkadotExplorerEndpoint { get; set; }

@@ -28,14 +28,8 @@ namespace Validators.IO.Polkadot.Monitor
 			services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, MonitorTask>();
 			services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, BotTask>();
 
-			//var botOptions = new BotOptions<AlertBot>();
-			//botOptions.ApiToken = "620950762:AAEZMMyfWfdvBX7dAwce1GXUqPzvHzkWHkQ";
-			//botOptions.BotUserName = "polkadot_testnet_bot";
-
-			//services.AddTelegramBot(botOptions)
-			//	 .AddUpdateHandler<StartCommand>()
-			//	 .Configure();
-
+			// Website
+			//
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 		}
 
