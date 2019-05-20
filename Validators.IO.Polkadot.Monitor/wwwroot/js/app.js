@@ -119,7 +119,7 @@ var app = new Vue({
 			$.get("/api/bots")
 				.done((result) => {
 					this.bot = result;
-					this.botAccessTokenInput = bot.accessToken;
+					this.botAccessTokenInput = this.bot.accessToken;
 					this.errorMessage = null;
 				})
 				.fail((err) => {
