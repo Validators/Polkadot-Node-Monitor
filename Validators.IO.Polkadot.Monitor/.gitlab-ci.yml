@@ -6,7 +6,6 @@ stages:
     - build
     - deploy
     - cleanup
-before_script:
 
 build:
     stage: build
