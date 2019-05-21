@@ -83,8 +83,8 @@ namespace Validators.IO.Polkadot.Monitor
 
 			app.UseHttpsRedirection();
 
-			app.UseAuthentication();
 			app.UseStaticFiles();
+			app.UseAuthentication();
 
 			app.UseMvc(routes =>
 			{
