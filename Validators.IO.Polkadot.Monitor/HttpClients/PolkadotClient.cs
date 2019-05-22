@@ -28,5 +28,6 @@ namespace Validators.IO.Polkadot.Monitor.HttpClients
 		{
 			return await Query<string>("system_chain");
 		}
+
 	}
 }

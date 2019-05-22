@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Validators.IO.Polkadot.Monitor.Database;
@@ -15,6 +17,7 @@ namespace Validators.IO.Polkadot.Monitor.Background.Tasks
 	{
 		private readonly AppSettings settings;
 		private readonly ILogger logger;
+		private DateTime? lastAlert;
 
 		public MonitorTask(IServiceScopeFactory serviceScopeFactory, IOptions<AppSettings> settings, ILogger<MonitorTask> logger)
 			 : base(serviceScopeFactory, "*/" + settings.Value.MonitorTaskFrequencyInSeconds + " * * * * *")
@@ -39,8 +42,8 @@ namespace Validators.IO.Polkadot.Monitor.Background.Tasks
 		{
 			try
 			{
-
 				var now = SystemClock.Instance.GetCurrentInstant();
+				var alerts = new List<string>();
 
 				using (var db = new AppDatabase())
 				{
@@ -50,29 +53,62 @@ namespace Validators.IO.Polkadot.Monitor.Background.Tasks
 					{
 						using (var client = new PolkadotClient(node.Url))
 						{
-							var health = await client.GetSystemHealth();
-							var chain = await client.GetSystemChain();
-							var nameAndVersion = await client.GetSystemNameAndVersion();
+							try
+							{
+								var health = await client.GetSystemHealth();
+								var chain = await client.GetSystemChain();
+								var nameAndVersion = await client.GetSystemNameAndVersion();
 
-							node.IsSyncing = health.IsSyncing;
-							node.Peers = health.Peers;
-							node.Chain = chain;
-							node.NameAndVersion = nameAndVersion;
+								node.IsSyncing = health.IsSyncing;
+								node.Peers = health.Peers;
+								node.Chain = chain;
+								node.NameAndVersion = nameAndVersion;
 
-							node.LastUpdatedUtc = now.InUtc().ToDateTimeUtc();
-							nodes.Update(node);
+								node.LastUpdatedUtc = now.InUtc().ToDateTimeUtc();
+								nodes.Update(node);
+
+
+								if (health.ShouldHavePeers && health.Peers <= settings.AlertForMinimumPeers)
+								{
+									alerts.Add("Peers are below " + settings.AlertForMinimumPeers + " (" + health.Peers + ") for " + node.Url);
+								}
+							}
+							catch (HttpRequestException ex)
+							{
+								alerts.Add("Node url not reachable: " + node.Url + " Message: " + ex.Message);
+							}
+							catch (Exception ex)
+							{
+								throw ex;
+							}
 						}
 					}
 
-					var bot = db.Bots.FindOne(b => b.Id == 1);
-					if (bot != null)
-					{
-						if (bot.IsEnabled)
-						{
-							var botClient = new TelegramBotClient(bot.AccessToken);
+					var nextAlertDate = lastAlert.GetValueOrDefault(DateTime.UtcNow.AddMinutes(-20)).AddMinutes(10);
 
-							var message = "Monitor updated for " + nodes.FindAll().Count() + " nodes";
-							await botClient.SendTextMessageAsync(bot.ChatId, message);
+					if (nextAlertDate < DateTime.UtcNow && alerts.Any())
+					{
+						var bot = db.Bots.FindOne(b => b.Id == 1);
+						if (bot != null)
+						{
+							if (bot.IsEnabled)
+							{
+								var botClient = new TelegramBotClient(bot.AccessToken);
+
+								var message = "";
+
+								var counter = 0;
+								foreach (var alert in alerts)
+								{
+									counter++;
+									message += counter + ") " + alert + Environment.NewLine;
+								}
+
+								message += Environment.NewLine + Environment.NewLine + "Next alert will trigger in 10 minutes.";
+
+								await botClient.SendTextMessageAsync(bot.ChatId, message);
+								lastAlert = DateTime.UtcNow;
+							}
 						}
 					}
 				}

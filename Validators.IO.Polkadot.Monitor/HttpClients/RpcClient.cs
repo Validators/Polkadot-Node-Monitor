@@ -25,21 +25,13 @@ namespace Validators.IO.Polkadot.Monitor.HttpClients
 			var data = new RpcRequest(method, parameters);
 
 			var response = await client.PostAsJsonAsync("", data);
-			var responseContent = await response.Content.ReadAsAsync<RpcResponse>();
 
 			if (response?.IsSuccessStatusCode == false)
 			{
-				// If failed, throw the body as the exception message.
-				//
-				if (responseContent != null)
-				{
-					throw new HttpRequestException("Request to " + client.BaseAddress + " failed. Content: " + JsonConvert.SerializeObject(responseContent));
-				}
-				else
-				{
-					response.EnsureSuccessStatusCode();
-				}
+				response.EnsureSuccessStatusCode();
 			}
+
+			var responseContent = await response.Content.ReadAsAsync<RpcResponse>();
 
 			return responseContent.Result.ToObject<T>();
 		}

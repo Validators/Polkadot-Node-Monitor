@@ -11,6 +11,7 @@ namespace Validators.IO.Polkadot.Monitor
 
 		public int MonitorTaskFrequencyInSeconds { get; set; }
 		public int BotTaskFrequencyInSeconds { get; set; }
+		public int AlertForMinimumPeers { get; set; }
 
 		public string LocalNodeEndpoint { get; set; }
 		public string PublicNodeEndpoint { get; set; }

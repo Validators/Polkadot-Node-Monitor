@@ -106,7 +106,7 @@
 						<div class="alert alert-primary" v-if="bot.accessToken != null">
 							<h4 class="display-4">Bot is registered.</h4>
 							<p class="lead">Your bot: <a target="_blank" :href="'https://t.me/' + bot.username">{{bot.username}}</a></p>
-							<h4 class="" v-if="bot.isEnabled==true">Is sending alerts.</h4>
+							<h4 class="" v-if="bot.isEnabled==true">Is receiving alerts.</h4>
 							<h5 v-if="bot.isEnabled==false">Is awaiting for the <strong>/start</strong> message from you.</h5>
 						</div>
 
